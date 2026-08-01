@@ -1,0 +1,68 @@
+\subsection{Cross-references}
+Everything is referenced through \verb|cleveref|, so the leading word is generated rather than typed.
+Write \verb|\cref{tab:simple}| and get \cref{tab:simple}, or \verb|\Cref{fig:single}| at the start of a sentence and get \Cref{fig:single}.
+Several references collapse automatically, so \verb|\cref{tab:simple,tab:grouped,tab:wrapping}| gives \cref{tab:simple,tab:grouped,tab:wrapping}.
+Never hard-code the word ``Table'' or ``Figure'' in front of a reference, because it defeats the whole mechanism.
+
+Label prefixes keep the reference space legible.
+Use \verb|fig:|, \verb|tab:|, \verb|eq:|, \verb|sec:|, and \verb|alg:|.
+
+\subsection{Citations}
+Citations are numeric and sorted, through \verb|natbib|.
+Use \verb|\citep| for a parenthetical citation, as in \citep{example2026}, and \verb|\citet| for a textual one, as in \citet{example2026}.
+Several keys in one command compress into a range, so \verb|\citep{example2026,example2025}| gives \citep{example2026,example2025}.
+Page numbers go in the optional argument, as in \citep[p.~14]{example2026}.
+
+\subsection{Equations}
+A numbered display uses \verb|equation|, and stays inside the draft-mode line numbering.
+
+\begin{equation}\label{eq:mutual}
+  I(A;B) = H(A) + H(B) - H(A,B)
+\end{equation}
+
+Use \verb|align| for several related lines, aligned on the relation symbol.
+Mark any line that does not need a number with \verb|\nonumber|.
+
+\begin{align}
+  R &\geq q\left[1 - H_2(e_\mathrm{b}) - f H_2(e_\mathrm{p})\right] \nonumber \\
+    &\geq q\left[1 - 2H_2(e)\right]
+  \label{eq:keyrate}
+\end{align}
+
+An unnumbered display uses \verb|\[ ... \]|, and a case distinction uses \verb|cases|.
+
+\[
+  \rho = \begin{cases}
+    \ket{0}\bra{0} & \text{with probability } p, \\
+    \ket{1}\bra{1} & \text{otherwise.}
+  \end{cases}
+\]
+
+\Cref{eq:mutual,eq:keyrate} are referenced the same way as everything else.
+
+\subsection{Lists}
+\verb|enumitem| controls the spacing.
+The \verb|noitemsep| key removes the gaps between items, which matters in a two-column paper where vertical space is scarce.
+
+\begin{itemize}[noitemsep]
+  \item A tight bulleted item.
+  \item A second one.
+\end{itemize}
+
+\begin{enumerate}[label=(\roman*),noitemsep]
+  \item A numbered item with a custom label format.
+  \item A second one.
+\end{enumerate}
+
+\begin{description}[noitemsep]
+  \item[Concept] The phase in which the problem space is characterised.
+  \item[Definition] The phase in which requirements and architecture are settled.
+\end{description}
+
+\subsection{Other fragments}
+A footnote looks like this.\footnote{Footnotes sit at the foot of the column in the two-column model.}
+Inline verbatim uses \verb|\verb|, and a short quotation uses the \verb|quote| environment.
+
+\begin{quote}
+  A displayed quotation, indented on both sides and set without quotation marks.
+\end{quote}

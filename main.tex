@@ -1,0 +1,82 @@
+%% ---------------------------------------------------------------------------
+%% Mode is chosen here, and nowhere else.
+%%
+%%   draft    line numbers, DRAFT watermark, date/version footer, word counts
+%%   preprint clean output for arXiv or submission
+%%
+%%   onecolumn / twocolumn   column model (the abstract is full width in both)
+%%
+%% Examples:
+%%   \documentclass[draft,twocolumn]{manuscript}
+%%   \documentclass[preprint,onecolumn]{manuscript}
+%% ---------------------------------------------------------------------------
+\documentclass[draft, twocolumn]{manuscript}
+
+\title{A Journal-Agnostic Template for Drafting and Preprint Publication}
+
+\author{Hayato Ishida}
+\affiliation{Loughborough Quantum Systems Engineering, Loughborough University,\\
+Epinal Way, Loughborough LE11 3TU, United Kingdom}
+\email{H.Ishida@lboro.ac.uk}
+
+\version{v0.1}
+\keywords{Quantum Systems Engineering, Systems Engineering, Quantum Computing}
+
+% Optional unnumbered first-page footnote for funding or acknowledgement.
+% \thanksnote{This work was supported by ...}
+
+%% Paper-specific macros. Keep them here rather than in the class, so the
+%% class stays generic and each paper carries its own shorthands.
+\newcommand{\ket}[1]{\lvert #1 \rangle}
+\newcommand{\bra}[1]{\langle #1 \rvert}
+\newcommand{\braket}[2]{\langle #1 \vert #2 \rangle}
+
+\begin{document}
+
+%% The abstract must be declared before \maketitle.
+%% The class captures it here and sets it full width across both columns.
+\begin{abstract}
+Replace this paragraph with the abstract.
+One sentence per line in the source, following the vault LaTeX conventions.
+The abstract is set at full text width in both the one-column and the two-column model, so it reads the same way in either mode.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+\input{sections/introduction}
+
+\section{Background}
+\input{sections/background}
+
+%% ---------------------------------------------------------------------------
+%% The three sections below are worked examples, not paper content.
+%% Delete them, and their files, once the template is in use.
+%% ---------------------------------------------------------------------------
+\section{Figure Examples}\label{sec:figures}
+\input{sections/figures}
+
+\section{Table Examples}\label{sec:tables}
+\input{sections/tables}
+
+\section{Other Elements}\label{sec:other}
+\input{sections/other}
+%% ---------------------------------------------------------------------------
+
+\section{Conclusion}
+\input{sections/conclusion}
+
+\section*{Acknowledgment}
+Replace with acknowledgements, or comment this section out.
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+%% Appendices read better in a single column. In onecolumn mode this is a
+%% no-op, so the same source works in both models.
+\onecolumn
+\appendix
+\section{Appendix}\label{sec:appendix}
+\input{sections/appendix}
+
+\end{document}

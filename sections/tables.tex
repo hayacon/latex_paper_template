@@ -1,0 +1,163 @@
+All tables use \verb|booktabs| rules.
+Never use vertical rules, and never use \verb|\hline| where \verb|\toprule|, \verb|\midrule|, or \verb|\bottomrule| will do.
+The caption sits above the table, unlike a figure caption, which sits below.
+
+\subsection{Simple table}
+The plain case, with a column specification of \verb|l| for text and \verb|r| for numbers.
+See \cref{tab:simple}.
+
+\begin{table}[t]
+  \centering
+  \caption{A simple table with \texttt{booktabs} rules.}
+  \label{tab:simple}
+  \begin{tabular}{lrr}
+    \toprule
+    Technical process & Papers & Share \\
+    \midrule
+    System realisation      & 8281 & 96.02\% \\
+    Verification            &  216 &  2.50\% \\
+    Mission analysis        &  121 &  1.40\% \\
+    Requirements definition &    5 &  0.06\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Grouped headers and merged cells}
+\verb|\multicolumn| groups columns, and \verb|\cmidrule(lr)| underlines only that group.
+\verb|\multirow| merges cells downward.
+The \verb|(lr)| trimming keeps adjacent rules from touching.
+See \cref{tab:grouped}.
+
+\begin{table}[t]
+  \centering
+  \caption{Grouped column headers with \texttt{\textbackslash multicolumn} and merged rows with \texttt{\textbackslash multirow}.}
+  \label{tab:grouped}
+  \begin{tabular}{llrr}
+    \toprule
+    \multirow{2}{*}{Phase} & \multirow{2}{*}{Process}
+      & \multicolumn{2}{c}{Corpus} \\
+    \cmidrule(lr){3-4}
+      & & Count & Share \\
+    \midrule
+    \multirow{2}{*}{Concept}
+      & Mission analysis   & 121 & 1.40\% \\
+      & Stakeholder needs  &   0 & 0.00\% \\
+    \midrule
+    \multirow{2}{*}{Definition}
+      & Requirements       &   5 & 0.06\% \\
+      & Architecture       & 402 & 4.66\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Table with a wrapping text column}
+\verb|tabularx| stretches one column to fill a target width.
+The class defines \verb|L|, \verb|C|, and \verb|R| as left, centre, and right ragged versions of the stretching \verb|X| column, which avoids the stretched justification that plain \verb|X| produces.
+Set the target width to \verb|\columnwidth| in the two-column model.
+See \cref{tab:wrapping}.
+
+\begin{table}[t]
+  \centering
+  \caption{A wrapping description column, using \texttt{tabularx} and the \texttt{L} column type.}
+  \label{tab:wrapping}
+  \begin{tabularx}{\columnwidth}{lL}
+    \toprule
+    Process & Description \\
+    \midrule
+    Mission analysis
+      & Establishes the problem space and the operational need that the system is meant to address. \\
+    Requirements
+      & Transforms stakeholder needs into a verifiable specification of what the system shall do. \\
+    Verification
+      & Confirms that the realised system meets the specification it was built against. \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Numeric alignment}
+\verb|siunitx| aligns numbers on the decimal point through the \verb|S| column type.
+Header text in an \verb|S| column must be wrapped in braces, or the package will try to parse it as a number.
+Use \verb|\num| and \verb|\SI| in the body text too, so units and digit grouping stay consistent throughout the paper.
+See \cref{tab:numeric}.
+
+\begin{table}[t]
+  \centering
+  \caption{Decimal-aligned figures, using the \texttt{siunitx} \texttt{S} column.}
+  \label{tab:numeric}
+  \begin{tabular}{l S[table-format=4.2] S[table-format=2.3]}
+    \toprule
+    Protocol & {Rate (\si{\kilo\bit\per\second})} & {Loss (\si{\decibel})} \\
+    \midrule
+    BB84    & 1204.50 &  6.200 \\
+    Decoy   &  980.75 & 11.480 \\
+    MDI     &   12.05 & 24.000 \\
+    TF      &    3.40 & 46.125 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Table with notes}
+\verb|threeparttable| keeps footnotes attached to the table rather than to the page.
+The note markers are independent of the document footnote counter, so they do not disturb the numbering of ordinary footnotes.
+See \cref{tab:notes}.
+
+\begin{table}[t]
+  \centering
+  \begin{threeparttable}
+    \caption{A table carrying its own notes.}
+    \label{tab:notes}
+    \begin{tabular}{lrr}
+      \toprule
+      Source & Records\tnote{a} & Retained \\
+      \midrule
+      IEEE Xplore & 3412 & 3180 \\
+      Scopus      & 6104 & 5444\tnote{b} \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}[flushleft]\footnotesize
+      \item[a] Before de-duplication across the two databases.
+      \item[b] Excludes conference abstracts shorter than two pages.
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
+
+\subsection{Full-width table}
+\verb|table*| spans both columns, and carries the same top-of-page-only restriction as \verb|figure*|.
+See \cref{tab:wide}.
+
+\begin{table*}[t]
+  \centering
+  \caption{A full-width table, declared with \texttt{table*}.}
+  \label{tab:wide}
+  \begin{tabularx}{\textwidth}{llLr}
+    \toprule
+    Process & Standard clause & Intent & Papers \\
+    \midrule
+    Mission analysis   & 6.4.1 & Characterise the problem space and the operational need. & 121 \\
+    Stakeholder needs  & 6.4.2 & Elicit and agree the needs of those who will use the system. & 0 \\
+    Requirements       & 6.4.3 & State verifiable system requirements derived from those needs. & 5 \\
+    Architecture       & 6.4.4 & Define the structural options that could satisfy the requirements. & 402 \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\subsection{Oversized table}
+When a table is a little too wide, shrink it with \verb|adjustbox| rather than reducing the font size by hand.
+If it is far too wide, the table is usually trying to do too much, and belongs in an appendix or split in two.
+
+\begin{table}[t]
+  \centering
+  \caption{A wide table clamped to the column with \texttt{adjustbox}.}
+  \label{tab:clamped}
+  \begin{adjustbox}{max width=\columnwidth}
+    \begin{tabular}{lrrrrr}
+      \toprule
+      Process & 2021 & 2022 & 2023 & 2024 & 2025 \\
+      \midrule
+      Implementation & 412 & 455 & 501 & 588 & 640 \\
+      Integration    &  88 & 104 & 161 & 224 & 302 \\
+      Verification   &  21 &  24 &  30 &  36 &  44 \\
+      \bottomrule
+    \end{tabular}
+  \end{adjustbox}
+\end{table}

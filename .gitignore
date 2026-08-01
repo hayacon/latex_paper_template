@@ -1,0 +1,23 @@
+## Core LaTeX auxiliary files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+## Bibliography files
+*.bbl
+*.blg
+*.run.xml
+*.bcf
+
+.DS_Store
+
+## Folders/Build artifacts
+indent.log
+
+## Generated for the review form
+*.wcnt
+*.rvw

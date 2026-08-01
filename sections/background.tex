@@ -1,0 +1,23 @@
+Replace this file with the background.
+This stub exists to demonstrate that displayed mathematics, figures, and tables all carry line numbers correctly in draft mode.
+
+A displayed equation stays inside the line numbering.
+\begin{equation}\label{eq:example}
+  I(A;B) = H(A) + H(B) - H(A,B)
+\end{equation}
+
+\Cref{eq:example} is referenced through \texttt{cleveref}, so the word ``Equation'' is generated automatically.
+
+\begin{table}[t]
+  \centering
+  \caption{Tables use \texttt{booktabs} rules.}
+  \label{tab:example}
+  \begin{tabular}{lr}
+    \toprule
+    Process & Share \\
+    \midrule
+    System realisation & 96\% \\
+    Requirements definition & 0.06\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}

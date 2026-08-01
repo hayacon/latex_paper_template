@@ -1,0 +1,103 @@
+Every figure below uses a placeholder file from \texttt{figures/}.
+The class sets \verb|\graphicspath| to that folder, so \verb|\includegraphics| needs only the file name.
+
+\subsection{Single-column figure}
+This is the default case.
+Size the image with \verb|width=\columnwidth| rather than a fixed length, so it adapts when the column model changes.
+The label goes after the caption, never before, or the reference number comes out wrong.
+See \cref{fig:single}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{placeholder-a}
+  \caption{A single-column figure, sized with \texttt{width=\textbackslash columnwidth}.}
+  \label{fig:single}
+\end{figure}
+
+\subsection{Full-width figure}
+Use \verb|figure*| to span both columns in the two-column model.
+It can only float to the top of a page, never to the middle or bottom, and never onto the page it was declared on.
+Declare it a page or two before you want it to appear.
+In the one-column model \verb|figure*| behaves exactly like \verb|figure|, so the source stays valid in both modes.
+See \cref{fig:wide}.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.8\textwidth]{placeholder-wide}
+  \caption{A full-width figure, declared with \texttt{figure*} and sized against \texttt{\textbackslash textwidth}.}
+  \label{fig:wide}
+\end{figure*}
+
+\subsection{Side-by-side subfigures}
+\verb|subcaption| gives each panel its own letter and label.
+Reference the whole figure as \cref{fig:pair}, or one panel as \cref{fig:pair-left}.
+Keep the two \verb|subfigure| widths summing to slightly under 1, so the panels do not collide.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{0.48\columnwidth}
+    \includegraphics[width=\linewidth]{placeholder-a}
+    \caption{First panel.}
+    \label{fig:pair-left}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\columnwidth}
+    \includegraphics[width=\linewidth]{placeholder-b}
+    \caption{Second panel.}
+    \label{fig:pair-right}
+  \end{subfigure}
+  \caption{Two subfigures side by side.}
+  \label{fig:pair}
+\end{figure}
+
+\subsection{Stacked subfigures}
+Drop the \verb|\hfill| and add a blank-line break to stack panels vertically instead.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{0.7\columnwidth}
+    \includegraphics[width=\linewidth]{placeholder-a}
+    \caption{Top panel.}
+    \label{fig:stack-top}
+  \end{subfigure}
+
+  \vspace{0.6em}
+
+  \begin{subfigure}[b]{0.7\columnwidth}
+    \includegraphics[width=\linewidth]{placeholder-b}
+    \caption{Bottom panel.}
+    \label{fig:stack-bottom}
+  \end{subfigure}
+  \caption{Two subfigures stacked vertically.}
+  \label{fig:stack}
+\end{figure}
+
+\subsection{Text-wrapped figure}
+\verb|wrapfig| lets prose flow around a small figure.
+It is fragile near page breaks, list environments, and section headings, so use it sparingly and check the output every time.
+Put it at the start of a paragraph, never inside one.
+
+\begin{wrapfigure}{r}{0.45\columnwidth}
+  \centering
+  \includegraphics[width=0.43\columnwidth]{placeholder-b}
+  \caption{A wrapped figure.}
+  \label{fig:wrapped}
+\end{wrapfigure}
+
+The paragraph that follows the \verb|wrapfigure| environment is the one that wraps around it.
+Give the environment a width a little larger than the image itself, so the text does not press against the edge of the graphic.
+If the wrap breaks across a page, move the environment one paragraph earlier or later rather than fighting the placement options.
+Two or three sentences of surrounding prose are usually enough to fill the space beside a half-column image.
+
+\subsection{Rotated and oversized figures}
+\verb|adjustbox| handles an image that refuses to fit.
+\verb|max width=\columnwidth| shrinks only when needed, and leaves smaller images untouched.
+
+\begin{figure}[t]
+  \centering
+  \begin{adjustbox}{max width=\columnwidth}
+    \includegraphics[width=1.6\columnwidth]{placeholder-a}
+  \end{adjustbox}
+  \caption{An oversized image, clamped by \texttt{adjustbox}.}
+  \label{fig:clamped}
+\end{figure}

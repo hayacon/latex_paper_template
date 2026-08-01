@@ -1,0 +1,46 @@
+Appendices usually read better in a single column, even when the body is set in two.
+Switching is a matter of one \verb|\onecolumn| before the appendix material, as done in \texttt{main.tex}.
+In the one-column model the command is harmless, so the source stays valid in both modes.
+
+\subsection{Multi-page table}
+\verb|longtable| breaks a table across pages, which an ordinary \verb|table| float cannot do.
+It does not work inside a two-column page, which is the reason for the \verb|\onecolumn| switch above.
+It is also not a float, so it appears exactly where it is written, and takes no placement argument.
+
+The header rows are declared once and repeated automatically on every page.
+
+\begin{longtable}{llr}
+  \caption{A table that breaks across pages, using \texttt{longtable}.}
+  \label{tab:long} \\
+  \toprule
+  Process & Clause & Papers \\
+  \midrule
+  \endfirsthead
+
+  \multicolumn{3}{l}{\footnotesize\itshape \Cref{tab:long}, continued.} \\
+  \toprule
+  Process & Clause & Papers \\
+  \midrule
+  \endhead
+
+  \midrule
+  \multicolumn{3}{r}{\footnotesize\itshape Continued on the next page.} \\
+  \endfoot
+
+  \bottomrule
+  \endlastfoot
+
+  Mission analysis        & 6.4.1 &  121 \\
+  Stakeholder needs       & 6.4.2 &    0 \\
+  Requirements definition & 6.4.3 &    5 \\
+  Architecture definition & 6.4.4 &  402 \\
+  Design definition       & 6.4.5 & 1044 \\
+  System analysis         & 6.4.6 &  188 \\
+  Implementation          & 6.4.7 & 5901 \\
+  Integration             & 6.4.8 &  934 \\
+  Verification            & 6.4.9 &  216 \\
+\end{longtable}
+
+The four header and footer blocks are all optional.
+\verb|\endfirsthead| runs on the first page only, \verb|\endhead| on every later page, \verb|\endfoot| at the foot of every page but the last, and \verb|\endlastfoot| at the very end.
+Note the \verb|\\| after \verb|\label|, which is easy to omit and produces a confusing error when it is.

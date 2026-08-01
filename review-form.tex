@@ -1,0 +1,373 @@
+%% ---------------------------------------------------------------------------
+%% Review form, for marking up a printed draft with a pen.
+%%
+%% Build the paper first, then this:
+%%     latexmk -pdf main.tex
+%%     latexmk -pdf review-form.tex
+%%
+%% It reads main.rvw (section numbers, names and pages, written by
+%% manuscript.cls) and main.wcnt (word counts, written by wordcount.py),
+%% so the form always matches the draft you just printed. The bibliography
+%% heading is deliberately left out of the list.
+%%
+%% To review a paper that was not built with this class, point \rvwsource
+%% at a name with no matching .rvw file and the form falls back to blank
+%% numbered rows that you fill in by hand.
+%%
+%% How it is meant to be used: mark the printed draft with two strokes
+%% only, an underline for "wrong here" and a cross line for "cut". Then go
+%% section by section and take each criterion in turn. Tick its box if the
+%% section is clean on that criterion, otherwise leave the box and write
+%% the line numbers you marked. Draft mode numbers lines continuously, so
+%% the number alone locates the line.
+%%
+%% The form runs to as many pages as it needs. Raise \rvwrowheight for
+%% more writing space per section.
+%% ---------------------------------------------------------------------------
+\documentclass[10pt,a4paper]{article}
+
+\newcommand{\rvwsource}{main}   % job name of the paper being reviewed
+\newcommand{\rvwblankrows}{16}  % rows to draw when no .rvw file is found
+\newcommand{\rvwrowheight}{20mm}% height of the line-number row
+\newcommand{\rvwnoteheight}{20mm}% height of the notes row beneath it
+
+\usepackage[a4paper,top=12mm,bottom=12mm,left=11mm,right=11mm]{geometry}
+\usepackage[T1]{fontenc}
+\IfFileExists{libertinus.sty}{\usepackage{libertinus}}{\usepackage{newtxtext}}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xltabular}
+\usepackage[table]{xcolor}
+\usepackage{amssymb}
+\usepackage[normalem]{ulem}   % normalem: leave \emph alone
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\definecolor{rvwrule}{gray}{0.55}
+\definecolor{rvwfaint}{gray}{0.45}
+
+%% ---------------------------------------------------------------------------
+%% MARKING KEY
+%%
+%% The paper carries only "where": two strokes, both a single motion, and
+%% unmistakable from each other at a glance a week later. Which criterion
+%% a mark belongs to is recorded on this form instead, by writing the line
+%% number under the matching column. Draft mode numbers lines continuously
+%% through the document, so a line number identifies a place exactly.
+%%
+%% One \rvwmark per stroke: {sample}{what it means}. The sample is drawn
+%% with ulem, so it prints as the actual stroke.
+%% Other strokes, should you ever want one: \uuline \uwave \dashuline
+%% \dotuline \xout
+%% ---------------------------------------------------------------------------
+
+\newcommand{\rvwmarkkey}{%
+  \rvwmark{\uline{underlined text}}%
+          {something is wrong here}%
+  \rvwmark{\sout{struck through}}%
+          {cut this, or say it shorter}%
+}
+
+% What goes in a criterion cell on this form, as opposed to on the paper.
+\newcommand{\rvwformkey}{%
+  \rvwmark{\rvwtickedbox}%
+          {the section is clean on this criterion}%
+  \rvwmark{\small 47, 52, 61}%
+          {these marked lines are the ones that are not}%
+}
+
+%% ---------------------------------------------------------------------------
+%% Reading the paper's own records
+%% ---------------------------------------------------------------------------
+
+\newcounter{rvwcount}
+\newif\ifrvwfound
+
+% Index of the first unnumbered section, which is where the body ends and
+% the back matter begins. Worked out in the first pass, because longtable
+% typesets its body more than once and any flag set during the table would
+% already be raised by the time the real pass runs.
+\newcommand{\rvwbodybreak}{0}
+
+\newcommand{\rvwpapertitle}{}
+\newcommand{\rvwversion}{}
+\newcommand{\rvwdate}{}
+\newcommand{\rvwmode}{}
+
+\newcommand{\rvwmeta}[4]{%
+  \renewcommand{\rvwpapertitle}{#1}%
+  \renewcommand{\rvwversion}{#2}%
+  \renewcommand{\rvwdate}{#3}%
+  \renewcommand{\rvwmode}{#4}%
+}
+
+% Word counts, keyed by the same index manuscript.cls uses. An undefined
+% key expands to \relax, which is how a missing count prints as nothing.
+\def\mswc#1#2{\expandafter\gdef\csname rvw@wc@#1\endcsname{#2}}
+\newcommand{\rvwwc}[1]{%
+  \expandafter\ifx\csname rvw@wc@#1\endcsname\relax\else
+    \csname rvw@wc@#1\endcsname
+  \fi}
+
+\IfFileExists{\rvwsource.wcnt}{\input{\rvwsource.wcnt}}{}
+
+% Missing counts must be visible on the sheet. Silently blank cells look
+% like a paper with no words in it.
+\newif\ifrvwhaswc
+\expandafter\ifx\csname rvw@wc@total\endcsname\relax
+  \rvwhaswcfalse
+\else
+  \rvwhaswctrue
+\fi
+
+% First pass over the .rvw: pick up the metadata, count the sections, and
+% note where the back matter starts.
+\newcommand{\rvwsection}[4]{%
+  \stepcounter{rvwcount}%
+  \if\relax\detokenize{#2}\relax
+    \ifnum\rvwbodybreak=0 \renewcommand{\rvwbodybreak}{#1}\fi
+  \fi
+}
+\IfFileExists{\rvwsource.rvw}{%
+  \rvwfoundtrue
+  \input{\rvwsource.rvw}%
+}{%
+  \rvwfoundfalse
+  \setcounter{rvwcount}{\rvwblankrows}%
+}
+
+\newlength{\rvwrowht}
+\setlength{\rvwrowht}{\rvwrowheight}
+\newlength{\rvwnoteht}
+\setlength{\rvwnoteht}{\rvwnoteheight}
+
+% An invisible strut that gives every row its writing height. Almost all
+% of it hangs below the baseline, so the section name and the tick boxes
+% sit at the top of the row and the space to write line numbers in falls
+% underneath them.
+\newcommand{\rvwstrut}{\rule[-0.76\rvwrowht]{0pt}{0.29\rvwrowht}}
+
+% The notes strut puts nearly all of its height below the baseline, so the
+% label sits at the top of the row and the space beneath it is free.
+\newcommand{\rvwnotestrut}{\rule[-0.82\rvwnoteht]{0pt}{0.18\rvwnoteht}}
+
+% Blank rows, built up before the table rather than looped inside it.
+% A \loop inside an alignment interferes with how TeX scans the cells.
+\newcommand{\rvwblankbody}{}
+\newcommand{\rvwaddblankrow}{%
+  \expandafter\def\expandafter\rvwblankbody\expandafter{%
+    \rvwblankbody \rvwstrut & & &
+      & \rvwbox & \rvwbox & \rvwbox & \rvwbox \\
+    \rvwinnerline\rvwnotesrow}%
+}
+\newcounter{rvwblank}
+\loop\ifnum\value{rvwblank}<\rvwblankrows
+  \stepcounter{rvwblank}%
+  \rvwaddblankrow
+\repeat
+
+%% ---------------------------------------------------------------------------
+%% Form furniture
+%% ---------------------------------------------------------------------------
+
+% LaTeX's \input expands to "\@@input <file> \relax". Inside an alignment
+% that trailing \relax sits between two rows and opens an empty one, so
+% the primitive is used instead when reading the .rvw into the table.
+\makeatletter
+\newcommand{\rvwreadrows}{\@@input \rvwsource.rvw }
+\makeatother
+
+% The tick box that opens every criterion cell. Tick it if the section is
+% clean on that criterion, otherwise leave it and write the line numbers
+% beside it. \fboxsep is zeroed so the box is exactly the size asked for.
+\newcommand{\rvwemptybox}{%
+  {\setlength{\fboxsep}{0pt}%
+   \color{black!55}\framebox[3mm]{\rule{0pt}{3mm}}}%
+}
+\newcommand{\rvwbox}{\rvwemptybox\hspace{1mm}}
+
+% The same box with a tick in it, for the key. \rlap draws the frame with
+% no width, then the tick is centred over the same 3mm, so it lands inside
+% the box rather than beside it.
+\newcommand{\rvwtickedbox}{%
+  \rlap{\rvwemptybox}%
+  \makebox[3mm][c]{\raisebox{0.7mm}{\scriptsize\checkmark}}%
+}
+
+\newcommand{\rvwline}{\textcolor{rvwrule}{\rule{\linewidth}{0.4pt}}}
+\newcommand{\rvwrule}[1]{\textcolor{rvwrule}{\rule[-0.5ex]{#1}{0.4pt}}}
+\newcommand{\rvwfield}[2]{\textbf{#1}~\rvwrule{#2}}
+
+\newcolumntype{N}{>{\centering\arraybackslash}p{6mm}}
+\newcolumntype{W}{>{\centering\arraybackslash}p{10mm}}
+\newcolumntype{P}{>{\raggedright\arraybackslash\small}p{26mm}}
+% The criterion columns hold line numbers. They are X columns, so the four
+% of them share whatever the fixed columns leave, which is the whole width
+% now that notes have a row of their own.
+\newcolumntype{Y}{>{\raggedright\arraybackslash\small}X}
+
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1}
+
+% The grid header, repeated at the top of every page.
+\newcommand{\rvwheaderrow}{%
+  \rowcolor{black!7}
+  \rule[-0.25\baselineskip]{0pt}{1.4\baselineskip}%
+  \textbf{\S} & \textbf{Section} & \textbf{p.} & \textbf{words}
+    & \textbf{C/E} & \textbf{S/F} & \textbf{Eng} & \textbf{Cut} \\
+}
+
+% The rule between a section's criterion row and its notes band. It is
+% lighter than \hline so the two still read as one block, while the black
+% rules keep marking where one section ends and the next begins.
+% \arrayrulecolor supplies its own \noalign when it is used between rows,
+% so it must not be wrapped in one.
+\newcommand{\rvwinnerline}{%
+  \arrayrulecolor{black!35}\hline\arrayrulecolor{black}%
+}
+
+% The full-width notes row that sits under each section row. \multicolumn
+% drops the internal vertical rules, leaving one clear band to write in.
+\newcommand{\rvwnotesrow}{%
+  \multicolumn{8}{|l|}{%
+    \rvwnotestrut\footnotesize\color{rvwfaint}Notes} \\ \hline
+}
+
+% Totals rows. These are shaded with \cellcolor rather than \rowcolor:
+% \rowcolor is built on \noalign and so has to be the very first thing in
+% a row, which it cannot be when the row is emitted from inside a
+% conditional. \cellcolor works from within a cell and has no such rule.
+\newcommand{\rvwcc}{\cellcolor{black!5}}
+\newcommand{\rvwtotalrow}[2]{%
+  \rule[-0.3\baselineskip]{0pt}{1.5\baselineskip}\rvwcc
+    & \rvwcc\textbf{#1} & \rvwcc & \rvwcc\textbf{#2}
+    & \rvwcc & \rvwcc & \rvwcc & \rvwcc \\ \hline
+}
+\newcommand{\rvwsubtotalrow}{\rvwtotalrow{Body total}{\rvwwc{body}}}
+
+\begin{document}
+
+%% ---------------------------------------------------------------------------
+%% Header
+%% ---------------------------------------------------------------------------
+
+{\large\bfseries Review Form}\hfill
+{\footnotesize\color{rvwfaint}%
+  \ifrvwfound
+    \rvwmode\ \textbullet\ compiled \rvwdate
+    \ifrvwhaswc\else
+      \ \textbullet\ \textbf{no word counts, rebuild \texttt{\rvwsource.tex}}%
+    \fi
+  \else
+    no \texttt{\rvwsource.rvw} found \textbullet\ blank form
+  \fi}
+
+\vspace{1mm}
+\rvwline
+\vspace{2mm}
+
+{\small
+\begin{tabular}{@{}p{122mm}p{62mm}@{}}
+  \textbf{Paper}~\ifrvwfound \rvwpapertitle \else \rvwrule{104mm}\fi
+    & \rvwfield{Reviewer}{40mm} \\[2mm]
+  \textbf{Version}~\ifrvwfound \rvwversion \else \rvwrule{20mm}\fi
+    & \rvwfield{Reviewed}{42mm} \\
+\end{tabular}}
+
+\vspace{3mm}
+
+%% ---------------------------------------------------------------------------
+%% Marking key
+%% ---------------------------------------------------------------------------
+
+{\small\textbf{Key}}
+
+\vspace{1.5mm}
+
+% Each \rvwmark becomes one row of the key.
+\newcommand{\rvwmark}[2]{#1 & #2 \\}
+
+{\small
+\begin{tabular}{@{}p{88mm}@{\hspace{8mm}}p{88mm}@{}}
+  {\footnotesize\bfseries Mark the paper} &
+  {\footnotesize\bfseries Fill each criterion cell} \\[1mm]
+  % l columns, not p: the samples and their meanings then share a
+  % baseline, which a top-aligned p column does not give them.
+  \begin{tabular}{@{}l@{\hspace{7mm}}l@{}}\rvwmarkkey\end{tabular} &
+  \begin{tabular}{@{}l@{\hspace{7mm}}l@{}}\rvwformkey\end{tabular} \\
+\end{tabular}}
+
+\vspace{2.5mm}
+
+{\footnotesize\color{rvwfaint}%
+\textbf{C/E} claim and evidence \quad
+\textbf{S/F} structure and flow \quad
+\textbf{Eng} English and phrasing \quad
+\textbf{Cut} cut or expand.}
+
+\vspace{3mm}
+
+%% ---------------------------------------------------------------------------
+%% Per-section grid
+%% ---------------------------------------------------------------------------
+
+% Second pass: one row per section. Arguments are index, number, title, page.
+% \rvwmeta must be silenced first. It is the first line of the .rvw file,
+% and its \renewcommands would open a row of their own inside the table.
+%
+% The body subtotal goes immediately before the first back-matter section.
+% The test must stay fully expandable, or it would open a row before
+% \rowcolor gets its chance to run.
+\renewcommand{\rvwmeta}[4]{}
+\renewcommand{\rvwsection}[4]{%
+  \ifnum#1=\rvwbodybreak\relax\rvwsubtotalrow\fi
+  \rvwstrut #2 & #3 & #4 & \rvwwc{#1}
+    & \rvwbox & \rvwbox & \rvwbox & \rvwbox \\
+  \rvwinnerline
+  \rvwnotesrow
+}
+
+{\small
+\begin{xltabular}{\textwidth}{|N|P|N|W|Y|Y|Y|Y|}
+  \hline
+  \rvwheaderrow
+  \hline
+  \endfirsthead
+
+  \hline
+  \rvwheaderrow
+  \hline
+  \endhead
+
+  \endfoot
+  \endlastfoot
+
+  \ifrvwfound\rvwreadrows\else\rvwblankbody\fi
+  \rvwtotalrow{Total}{\rvwwc{total}}
+\end{xltabular}}
+
+\vspace{4mm}
+
+%% ---------------------------------------------------------------------------
+%% Whole-paper block
+%% ---------------------------------------------------------------------------
+
+% A minipage cannot break, so the closing block stays together rather than
+% splitting its heading from its ruled lines across a page boundary.
+\noindent\begin{minipage}{\textwidth}
+{\small\textbf{Overall}}\\[1.4mm]
+\rvwline\\[5mm]
+\rvwline\\[5mm]
+\rvwline\\[5mm]
+\rvwline
+
+\vspace{4mm}
+
+{\small\textbf{Verdict}\quad
+$\square$~ready to submit \quad
+$\square$~minor revision \quad
+$\square$~major revision \quad
+$\square$~restructure}
+\end{minipage}
+
+\end{document}
