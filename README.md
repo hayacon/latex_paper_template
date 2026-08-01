@@ -173,8 +173,9 @@ not in the class, so the class stays generic.
 
 ## Included by default
 
-Typography: `libertinus` fonts (falls back to `newtx`), `microtype`,
-`geometry`, `titlesec`, `fancyhdr`, `xcolor`.
+Typography: `newtxtext` + `newtxmath` (Times), `helvet` scaled to 0.92 as
+the sans companion, `microtype`, `geometry`, `titlesec`, `fancyhdr`,
+`xcolor`.
 
 Floats: `graphicx`, `caption`, `subcaption`, `float`, `wrapfig`.
 
@@ -198,6 +199,29 @@ afterwards, our `draft` would have triggered all of that.
 The class strips `draft` from the global option list, so it only ever
 means what the table above says. This matters if you add packages of your
 own to `main.tex` — they will not see a stray `draft` either.
+
+## Fonts
+
+Times, throughout text and maths.
+
+Under pdflatex the actual Monotype Times New Roman is not available, so
+the class uses **TeX Gyre Termes** via `newtx`, which is metrically
+compatible with it and is the standard substitute. Maths comes from
+`newtxmath`, which must be loaded after `amsmath` — the class handles the
+ordering. Sans is Helvetica (`helvet`) at 0.92 scale, used only for the
+draft line numbers; typewriter is newtx's own `t1xtt`.
+
+Everything is embedded as a Type 1 subset, so the PDF carries its own
+fonts and does not depend on what the printer has.
+
+Two things that are meant to be there, if you run `pdffonts`:
+
+- **Latin Modern** entries come from the placeholder images in
+  `figures/`, which have their labels drawn in it. They disappear once
+  you replace them with real figures.
+- `\sisetup` uses `per-mode=symbol`, giving "kbit/s" rather than
+  "kbit s⁻¹". Besides reading better, it avoids a superscript that
+  siunitx sets in a 7pt Computer Modern regardless of the text font.
 
 ## Writing conventions
 

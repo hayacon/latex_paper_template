@@ -33,12 +33,15 @@
 
 \usepackage[a4paper,top=12mm,bottom=12mm,left=11mm,right=11mm]{geometry}
 \usepackage[T1]{fontenc}
-\IfFileExists{libertinus.sty}{\usepackage{libertinus}}{\usepackage{newtxtext}}
+\usepackage{newtxtext}   % Times, to match manuscript.cls
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{xltabular}
 \usepackage[table]{xcolor}
 \usepackage{amssymb}
+% newtxmath after amssymb, so \checkmark comes from the Times-matching
+% maths font rather than from the Computer Modern AMS symbol fonts.
+\usepackage{newtxmath}
 \usepackage[normalem]{ulem}   % normalem: leave \emph alone
 
 \pagestyle{empty}
@@ -364,10 +367,10 @@
 \vspace{4mm}
 
 {\small\textbf{Verdict}\quad
-$\square$~ready to submit \quad
-$\square$~minor revision \quad
-$\square$~major revision \quad
-$\square$~restructure}
+\rvwemptybox~ready to submit \quad
+\rvwemptybox~minor revision \quad
+\rvwemptybox~major revision \quad
+\rvwemptybox~restructure}
 \end{minipage}
 
 \end{document}

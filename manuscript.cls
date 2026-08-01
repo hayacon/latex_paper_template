@@ -84,15 +84,20 @@
 
 \RequirePackage[T1]{fontenc}
 \RequirePackage[utf8]{inputenc}
-\IfFileExists{libertinus.sty}{%
-  \RequirePackage{libertinus}%
-}{%
-  \RequirePackage{newtxtext}\RequirePackage{newtxmath}%
-}
+% Times, via newtx. Under pdflatex the actual Monotype Times New Roman is
+% not available, so this uses TeX Gyre Termes, which is metrically
+% compatible with it and is the standard substitute. Helvetica is the
+% usual sans companion, scaled down because it runs large beside Times.
+% newtxmath has to come after amsmath, so it is loaded further down.
+\RequirePackage{newtxtext}
+\RequirePackage[scaled=0.92]{helvet}
 \RequirePackage{microtype}
 \RequirePackage{xcolor}
 \RequirePackage[final]{graphicx}
 \RequirePackage{amsmath,amssymb}
+% Must follow amsmath. Supplies Times-matching maths, so no Computer
+% Modern is left anywhere in the output.
+\RequirePackage{newtxmath}
 \RequirePackage{enumitem}
 \RequirePackage[skip=6pt,labelfont=bf,font=small]{caption}
 \RequirePackage{subcaption}
@@ -108,7 +113,10 @@
 \RequirePackage{threeparttable}
 \RequirePackage{adjustbox}
 \RequirePackage{siunitx}
-\sisetup{detect-all,table-align-text-post=false}
+% per-mode=symbol writes "kbit/s" rather than "kbit s^-1". Besides reading
+% better in prose, it avoids a superscript that siunitx sets in a 7pt
+% Computer Modern, which is the one place Times does not reach.
+\sisetup{detect-all,table-align-text-post=false,per-mode=symbol}
 
 % Slightly airier rows, and ragged variants of tabularx's X column.
 \renewcommand{\arraystretch}{1.15}
@@ -293,7 +301,9 @@
   \ifms@draft
     \@ifundefined{ms@wc@\themssec}{}{%
       \nobreak\hspace{0.6em}%
-      {\normalfont\footnotesize\color{msgrey}[\csname ms@wc@\themssec\endcsname\ words]}%
+      % \mbox so a long heading cannot break the tag into "[4147" / "words]".
+      \mbox{\normalfont\footnotesize\color{msgrey}%
+        [\csname ms@wc@\themssec\endcsname\ words]}%
     }%
   \fi
 }
