@@ -1,6 +1,10 @@
 %% ---------------------------------------------------------------------------
 %% Review form, for marking up a printed draft with a pen.
 %%
+%% Copyright (C) 2026 Hayato Ishida
+%% Distributed under the LaTeX Project Public License, version 1.3c or
+%% later. See LICENSE-LPPL.txt, or https://www.latex-project.org/lppl.txt
+%%
 %% Build the paper first, then this:
 %%     latexmk -pdf main.tex
 %%     latexmk -pdf review-form.tex
@@ -274,7 +278,7 @@
   \textbf{Paper}~\ifrvwfound \rvwpapertitle \else \rvwrule{104mm}\fi
     & \rvwfield{Reviewer}{40mm} \\[2mm]
   \textbf{Version}~\ifrvwfound \rvwversion \else \rvwrule{20mm}\fi
-    & \rvwfield{Reviewed}{42mm} \\
+    & \rvwfield{Date}{42mm} \\
 \end{tabular}}
 
 \vspace{3mm}

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Per-section word counter for manuscript.cls.
 
+Copyright (c) 2026 Hayato Ishida
+Released under the MIT License. See LICENSE-MIT.txt.
+
 Reads a main .tex file, follows \\input and \\include, and writes
 <jobname>.wcnt containing one \\mswc{<n>}{<count>} line per section
 command in source order, plus \\mswc{total}{<count>}.

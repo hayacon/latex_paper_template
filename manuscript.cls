@@ -1,6 +1,19 @@
 %% manuscript.cls
 %% A journal-agnostic paper class for drafting and preprint publication.
-%% Hayato Ishida (Kyon), Loughborough Quantum Systems Engineering.
+%%
+%% Copyright (C) 2026 Hayato Ishida
+%%
+%% This work may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3c of this license
+%% or (at your option) any later version. The latest version of this
+%% license is in
+%%     https://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2008 or later.
+%%
+%% This work has the LPPL maintenance status "maintained".
+%% The Current Maintainer of this work is Hayato Ishida.
+%% This work consists of the files manuscript.cls and review-form.tex.
 %%
 %% Usage:
 %%   \documentclass[draft,twocolumn]{manuscript}     % marked-up drafting copy
@@ -11,7 +24,7 @@
 %% The abstract is always set full width, in both column modes.
 
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
-\ProvidesClass{manuscript}[2026/07/31 v1.0 Journal-agnostic draft/preprint paper class]
+\ProvidesClass{manuscript}[2026/08/01 v1.0 Journal-agnostic draft/preprint paper class]
 
 %% ---------------------------------------------------------------------------
 %% Class options
