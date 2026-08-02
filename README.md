@@ -55,6 +55,14 @@ Headings LaTeX generates for itself — the `References` heading from
 for each. Without that, every count after the bibliography would be
 attached to the wrong heading.
 
+Besides the per-section counts it writes three named totals:
+
+| Key | Covers |
+|---|---|
+| `\mswc{abstract}` | the abstract alone, excluded from the two below |
+| `\mswc{body}` | everything up to the first unnumbered section |
+| `\mswc{total}` | the whole document, abstract aside |
+
 To run it by hand:
 
 ```bash
@@ -80,15 +88,36 @@ shaded totals rows are inserted automatically: **Body total** immediately
 before the first unnumbered section, which is the number venues care
 about, and **Total** at the very end.
 
-Each section gets two rows. The first has four criterion columns — **C/E**
-claim clear and evidence sufficient, **S/F** structure and flow, **Eng**
-English and phrasing, **Cut** cut or expand — and the second is a
-full-width **Notes** band with no internal rules, for writing across.
-Below the grid sit an overall block and a verdict line.
+The **abstract** gets a fixed row of its own at the top of the grid, ahead
+of the first section. It carries four criteria rather than five, since
+nothing is cited in an abstract, and **its word count is excluded from
+both totals** — venues count an abstract separately and against its own
+limit, so folding it into the body figure would only mislead. The count
+is still shown on its own row.
+
+Each section gets three rows. Five criteria are spread over the first
+two, three then two, so each cell stays wide enough to write several line
+numbers in:
+
+| | | |
+|---|---|---|
+| **C/E** claim and evidence | **S/F** structure and flow | **Eng** English and phrasing |
+| **Cut** cut or expand | **Cit** citation missing, weak, or not supporting the claim | |
+
+The third row is a full-width **Notes** band with no internal rules, for
+writing across. Below the grid sit an overall block and a verdict line.
+
+Each criterion carries its own label and tick box inside the cell, rather
+than being named in the header, because they no longer line up one per
+column.
 
 The form runs to as many pages as it needs. Two knobs control the writing
-space: `\rvwrowheight` for the line-number row, `\rvwnoteheight` for the
-notes band beneath it.
+space: `\rvwrowheight` for each of the two criterion rows,
+`\rvwnoteheight` for the notes band beneath them.
+
+To change the criteria, edit `\rvwsection` in the grid section of
+`review-form.tex` — the `\rvwcrit{...}` calls are the labels — and the
+legend line above the grid. Those are the only two places they are named.
 
 ### How it is meant to be used
 

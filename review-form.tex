@@ -32,7 +32,7 @@
 
 \newcommand{\rvwsource}{main}   % job name of the paper being reviewed
 \newcommand{\rvwblankrows}{16}  % rows to draw when no .rvw file is found
-\newcommand{\rvwrowheight}{20mm}% height of the line-number row
+\newcommand{\rvwrowheight}{16mm}% height of each of the two criterion rows
 \newcommand{\rvwnoteheight}{20mm}% height of the notes row beneath it
 
 \usepackage[a4paper,top=12mm,bottom=12mm,left=11mm,right=11mm]{geometry}
@@ -164,7 +164,9 @@
 \newcommand{\rvwaddblankrow}{%
   \expandafter\def\expandafter\rvwblankbody\expandafter{%
     \rvwblankbody \rvwstrut & & &
-      & \rvwbox & \rvwbox & \rvwbox & \rvwbox \\
+      & \rvwcrit{C/E} & \rvwcrit{S/F} & \rvwcrit{Eng} \\
+    \rvwinnerline
+    \rvwstrut & & & & \rvwcrit{Cut} & \rvwcrit{Cit} & \\
     \rvwinnerline\rvwnotesrow}%
 }
 \newcounter{rvwblank}
@@ -193,6 +195,11 @@
 }
 \newcommand{\rvwbox}{\rvwemptybox\hspace{1mm}}
 
+% A criterion cell: its name and tick box at the top, the rest of the
+% cell left free for line numbers. The criteria are spread over two rows
+% now, so each cell has to carry its own label; the header cannot.
+\newcommand{\rvwcrit}[1]{\textbf{#1}\hspace{0.7em}\rvwemptybox}
+
 % The same box with a tick in it, for the key. \rlap draws the frame with
 % no width, then the tick is centred over the same 3mm, so it lands inside
 % the box rather than beside it.
@@ -216,12 +223,14 @@
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1}
 
-% The grid header, repeated at the top of every page.
+% The grid header, repeated at the top of every page. The criteria are no
+% longer one per column, so the header spans them with a reminder instead
+% of naming them.
 \newcommand{\rvwheaderrow}{%
   \rowcolor{black!7}
   \rule[-0.25\baselineskip]{0pt}{1.4\baselineskip}%
   \textbf{\S} & \textbf{Section} & \textbf{p.} & \textbf{words}
-    & \textbf{C/E} & \textbf{S/F} & \textbf{Eng} & \textbf{Cut} \\
+    & \textbf{Criteria} & & \\
 }
 
 % The rule between a section's criterion row and its notes band. It is
@@ -236,7 +245,7 @@
 % The full-width notes row that sits under each section row. \multicolumn
 % drops the internal vertical rules, leaving one clear band to write in.
 \newcommand{\rvwnotesrow}{%
-  \multicolumn{8}{|l|}{%
+  \multicolumn{7}{|l|}{%
     \rvwnotestrut\footnotesize\color{rvwfaint}Notes} \\ \hline
 }
 
@@ -248,9 +257,22 @@
 \newcommand{\rvwtotalrow}[2]{%
   \rule[-0.3\baselineskip]{0pt}{1.5\baselineskip}\rvwcc
     & \rvwcc\textbf{#1} & \rvwcc & \rvwcc\textbf{#2}
-    & \rvwcc & \rvwcc & \rvwcc & \rvwcc \\ \hline
+    & \rvwcc & \rvwcc & \rvwcc \\ \hline
 }
 \newcommand{\rvwsubtotalrow}{\rvwtotalrow{Body total}{\rvwwc{body}}}
+
+% The abstract is always the first thing to review, and is not a section,
+% so it gets a fixed row rather than coming from the .rvw file. It carries
+% four criteria, not five: nothing is cited in an abstract. Its word count
+% is deliberately absent from both totals below.
+\newcommand{\rvwabstractrow}{%
+  \rvwstrut & Abstract & 1 & \rvwwc{abstract}
+    & \rvwcrit{C/E} & \rvwcrit{S/F} & \rvwcrit{Eng} \\
+  \rvwinnerline
+  \rvwstrut & & & & \rvwcrit{Cut} & & \\
+  \rvwinnerline
+  \rvwnotesrow
+}
 
 \begin{document}
 
@@ -310,7 +332,8 @@
 \textbf{C/E} claim and evidence \quad
 \textbf{S/F} structure and flow \quad
 \textbf{Eng} English and phrasing \quad
-\textbf{Cut} cut or expand.}
+\textbf{Cut} cut or expand \quad
+\textbf{Cit} citation missing, weak, or not supporting the claim.}
 
 \vspace{3mm}
 
@@ -326,16 +349,22 @@
 % The test must stay fully expandable, or it would open a row before
 % \rowcolor gets its chance to run.
 \renewcommand{\rvwmeta}[4]{}
+% Three rows per section: three criteria, then the remaining two, then
+% the notes band. The light rule between them keeps one cell's line
+% numbers from running into the next cell's label.
 \renewcommand{\rvwsection}[4]{%
   \ifnum#1=\rvwbodybreak\relax\rvwsubtotalrow\fi
   \rvwstrut #2 & #3 & #4 & \rvwwc{#1}
-    & \rvwbox & \rvwbox & \rvwbox & \rvwbox \\
+    & \rvwcrit{C/E} & \rvwcrit{S/F} & \rvwcrit{Eng} \\
+  \rvwinnerline
+  \rvwstrut & & &
+    & \rvwcrit{Cut} & \rvwcrit{Cit} & \\
   \rvwinnerline
   \rvwnotesrow
 }
 
 {\small
-\begin{xltabular}{\textwidth}{|N|P|N|W|Y|Y|Y|Y|}
+\begin{xltabular}{\textwidth}{|N|P|N|W|Y|Y|Y|}
   \hline
   \rvwheaderrow
   \hline
@@ -349,6 +378,7 @@
   \endfoot
   \endlastfoot
 
+  \rvwabstractrow
   \ifrvwfound\rvwreadrows\else\rvwblankbody\fi
   \rvwtotalrow{Total}{\rvwwc{total}}
 \end{xltabular}}
