@@ -18,8 +18,17 @@ separately and against its own limit.
 manuscript.cls reads that file in draft mode and prints the count beside
 each section heading and in the title block.
 
+With --sections-from-aux it also writes <jobname>.rvw, the section list
+review-form.tex needs, by reading the section entries LaTeX leaves in
+<jobname>.aux. That makes the review form usable with any document class,
+not just manuscript.cls, which writes its own .rvw and does not need this.
+
+Because one script then owns both files, the count indices and the
+section list cannot drift apart.
+
 Usage:
     python3 wordcount.py main.tex
+    python3 wordcount.py main.tex --sections-from-aux
 """
 
 import os
@@ -132,10 +141,92 @@ def count_words(chunk):
     return sum(1 for token in chunk.split() if re.search(r"[A-Za-z]", token))
 
 
+def read_group(text, start):
+    """Read a brace-balanced {...} group beginning at `start`.
+
+    Returns (contents, index just past the closing brace), or (None, start)
+    if `start` is not an opening brace. A regex cannot do this: section
+    titles routinely contain braces of their own.
+    """
+    if start >= len(text) or text[start] != "{":
+        return None, start
+    depth = 0
+    i = start
+    while i < len(text):
+        if text[i] == "\\":       # skip an escaped character
+            i += 2
+            continue
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start + 1:i], i + 1
+        i += 1
+    return None, start
+
+
+def tidy_title(raw):
+    """Turn a .aux section title into something printable on a form."""
+    number = ""
+    match = re.match(r"\s*\\numberline\s*", raw)
+    if match:
+        number, after = read_group(raw, match.end())
+        raw = raw[after:] if number is not None else raw[match.end():]
+        number = (number or "").strip()
+
+    # \texorpdfstring{tex}{pdf} keeps the first argument.
+    while True:
+        match = re.search(r"\\texorpdfstring\s*", raw)
+        if not match:
+            break
+        first, after = read_group(raw, match.end())
+        if first is None:
+            break
+        _, after = read_group(raw, after)
+        raw = raw[:match.start()] + first + raw[after:]
+
+    raw = re.sub(r"\\[a-zA-Z@]+\s*", "", raw)
+    raw = raw.replace("{", "").replace("}", "").replace("~", " ")
+    return number, " ".join(raw.split())
+
+
+def sections_from_aux(aux_path):
+    """Section number, title and page for each \\section in a .aux file.
+
+    Every class that uses a standard \\section writes these, whether or not
+    the document prints a table of contents, so this works far beyond
+    manuscript.cls. Starred sections are absent, since they add nothing to
+    the contents.
+    """
+    try:
+        with open(aux_path, encoding="utf-8", errors="replace") as handle:
+            aux = handle.read()
+    except OSError:
+        return []
+
+    found = []
+    for match in re.finditer(r"\\contentsline\s*", aux):
+        kind, after = read_group(aux, match.end())
+        if kind != "section":
+            continue
+        raw_title, after = read_group(aux, after)
+        page, after = read_group(aux, after)
+        if raw_title is None or page is None:
+            continue
+        number, title = tidy_title(raw_title)
+        found.append((number, title, " ".join(page.split())))
+    return found
+
+
 def main():
-    if len(sys.argv) != 2:
-        print("usage: wordcount.py <main.tex>", file=sys.stderr)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    if len(args) != 1 or flags - {"--sections-from-aux"}:
+        print("usage: wordcount.py <main.tex> [--sections-from-aux]",
+              file=sys.stderr)
         return 2
+    sys.argv = [sys.argv[0], args[0]]
 
     source = sys.argv[1]
     if not os.path.exists(source):
@@ -168,6 +259,7 @@ def main():
     body = 0
     counted = 0
     in_body = True
+    numbered = []   # indices of numbered sections, in document order
     for index, (begin, is_section, is_starred) in enumerate(heads, start=1):
         if is_starred:
             # Acknowledgements and the like end the body proper. Everything
@@ -175,6 +267,10 @@ def main():
             in_body = False
         if not is_section:
             continue  # reserve the index, emit nothing, so no tag is drawn
+        if not is_starred:
+            # Only these reach the .aux, so only these can be paired with
+            # its entries later.
+            numbered.append(index)
         count = count_words(text[begin:bounds[index]])
         total += count
         if in_body:
@@ -200,6 +296,36 @@ def main():
 
     print("wordcount.py: %d sections, %d words (+%d abstract) -> %s"
           % (counted, total, abstract, os.path.basename(out)))
+
+    if "--sections-from-aux" in flags:
+        base = os.path.splitext(source)[0]
+        entries = sections_from_aux(base + ".aux")
+        if not entries:
+            print("wordcount.py: no section entries in %s.aux, so no .rvw "
+                  "was written. Build the document first."
+                  % os.path.basename(base), file=sys.stderr)
+            return 1
+        if len(entries) != len(numbered):
+            print("wordcount.py: %d sections in the source but %d in the "
+                  ".aux; pairing the first %d. Word counts past that point "
+                  "may sit on the wrong row."
+                  % (len(numbered), len(entries),
+                     min(len(entries), len(numbered))), file=sys.stderr)
+
+        rvw = base + ".rvw"
+        with open(rvw, "w", encoding="utf-8") as handle:
+            handle.write("%% generated by wordcount.py -- do not edit\n")
+            for position, (number, title, page) in enumerate(entries):
+                if position >= len(numbered):
+                    break
+                # The trailing percent comments out the newline. Without it
+                # each line yields a space token, and a space between two
+                # rows of a table opens a row of its own.
+                handle.write("\\rvwsection{%d}{%s}{%s}{%s}%%\n"
+                             % (numbered[position], number, title, page))
+        print("wordcount.py: %d sections from .aux -> %s"
+              % (min(len(entries), len(numbered)), os.path.basename(rvw)))
+
     return 0
 
 

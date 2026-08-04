@@ -280,10 +280,20 @@
 %% Header
 %% ---------------------------------------------------------------------------
 
+% A .rvw written by manuscript.cls carries \rvwmeta; one generated from a
+% .aux by wordcount.py cannot, since a .aux holds no title or version.
+% The fields fall back to blank rules in that case.
+\newcommand{\rvwifknown}[2]{%
+  \ifx#1\empty #2\else #1\fi}
+
 {\large\bfseries Review Form}\hfill
 {\footnotesize\color{rvwfaint}%
   \ifrvwfound
-    \rvwmode\ \textbullet\ compiled \rvwdate
+    \ifx\rvwmode\empty
+      from \texttt{\rvwsource.aux}%
+    \else
+      \rvwmode\ \textbullet\ compiled \rvwdate
+    \fi
     \ifrvwhaswc\else
       \ \textbullet\ \textbf{no word counts, rebuild \texttt{\rvwsource.tex}}%
     \fi
@@ -297,9 +307,9 @@
 
 {\small
 \begin{tabular}{@{}p{122mm}p{62mm}@{}}
-  \textbf{Paper}~\ifrvwfound \rvwpapertitle \else \rvwrule{104mm}\fi
+  \textbf{Paper}~\rvwifknown{\rvwpapertitle}{\rvwrule{104mm}}
     & \rvwfield{Reviewer}{40mm} \\[2mm]
-  \textbf{Version}~\ifrvwfound \rvwversion \else \rvwrule{20mm}\fi
+  \textbf{Version}~\rvwifknown{\rvwversion}{\rvwrule{20mm}}
     & \rvwfield{Date}{42mm} \\
 \end{tabular}}
 

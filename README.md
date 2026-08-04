@@ -157,7 +157,48 @@ the actual stroke. Others exist if ever wanted: `\uuline`, `\uwave`,
 `\dashuline`, `\dotuline`, `\xout`. The criteria themselves are named in
 the key legend and the grid headings, and nowhere else.
 
-### Reviewing someone else's paper
+### Using the form with any other document class
+
+The form does not need `manuscript.cls`. Every class that uses a standard
+`\section` leaves the section list in its `.aux` file, whether or not the
+document prints a table of contents:
+
+```
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}...}
+```
+
+Number, title and page, for free. `wordcount.py` can read that and write
+the `.rvw` file the form expects:
+
+```bash
+pdflatex paper.tex                              # produces paper.aux
+python3 wordcount.py paper.tex --sections-from-aux
+pdflatex review-form.tex                        # with \rvwsource set to paper
+```
+
+One script writes both files, so the word counts cannot end up on the
+wrong rows. `manuscript.cls` writes its own `.rvw` and needs no flag.
+
+Three things are weaker in this mode, and the form shows which mode it is
+in at the top right:
+
+- **Starred sections are missing.** `\section*{Acknowledgment}` adds
+  nothing to the contents, so nothing reaches the `.aux`. References being
+  excluded is the same rule working in your favour.
+- **No Body total row.** It was anchored to the first unnumbered section,
+  which no longer exists here. The grand total is still shown.
+- **No title or version.** A `.aux` holds neither, so those fields print
+  as blank rules to fill in by hand.
+
+The line numbers the form asks you to record are not automatic either.
+Add them to your own preamble:
+
+```latex
+\usepackage[switch]{lineno}
+\linenumbers
+```
+
+### Reviewing a paper you cannot build
 
 Point `\rvwsource` at a name with no matching `.rvw` file and you get
 blank numbered rows to fill in by hand. Adjust how many with
